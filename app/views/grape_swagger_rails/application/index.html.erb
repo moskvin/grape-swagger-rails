@@ -182,6 +182,100 @@
       border-color: #475569;
     }
 
+    @media (max-width: 767px) {
+      .swagger-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+      }
+
+      .swagger-brand {
+        font-size: 20px;
+        line-height: 1.2;
+      }
+
+      .swagger-controls {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .swagger-auth {
+        width: 100%;
+      }
+
+      .swagger-label {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .swagger-input,
+      .swagger-theme-toggle {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      #swagger-ui-container {
+        min-height: calc(100vh - 152px);
+      }
+
+      .swagger-ui {
+        font-size: 15px;
+      }
+
+      .swagger-ui .wrapper {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .swagger-ui .info {
+        margin: 24px 0;
+      }
+
+      .swagger-ui .info .title {
+        font-size: 34px;
+        line-height: 1.1;
+        word-break: break-word;
+      }
+
+      .swagger-ui .opblock-tag {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 8px 12px;
+        padding-top: 18px;
+        padding-bottom: 18px;
+        padding-right: 44px;
+      }
+
+      .swagger-ui .opblock-tag-section h3 {
+        min-width: 0;
+        margin: 0;
+        line-height: 1.15;
+        word-break: break-word;
+      }
+
+      .swagger-ui .opblock-tag small {
+        flex: 1 1 100%;
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.35;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .swagger-ui .expand-operation {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        margin: 0;
+        transform: translateY(-50%);
+      }
+    }
+
     <% if GrapeSwaggerRails.options.hide_api_key_input %>
     .swagger-auth {
       display: none;
