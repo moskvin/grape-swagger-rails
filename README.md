@@ -41,13 +41,13 @@ Or install it yourself as:
 
 GrapeSwaggerRails is compatible with the following versions of grape and grape-swagger.
 
-grape  | grape-swagger
--------|--------------
-0.9.0  | 0.8.0
-0.10.0 | 0.9.0
-0.16.2 | 0.20.2
-1.8.0  | 1.6.1
-2.2.0  | 2.1.1
+| grape  | grape-swagger |
+|--------|---------------|
+| 0.9.0  | 0.8.0         |
+| 0.10.0 | 0.9.0         |
+| 0.16.2 | 0.20.2        |
+| 1.8.0  | 1.6.1         |
+| 2.2.0  | 2.1.1         |
 
 ## Usage
 
@@ -61,7 +61,7 @@ Create an initializer (e.g. `./config/initializers/swagger.rb`) and specify the 
 
 ```ruby
 GrapeSwaggerRails.options.url      = '/swagger_doc.json'
-GrapeSwaggerRails.options.app_url  = 'http://swagger.wordnik.com'
+GrapeSwaggerRails.options.app_url  = 'http://localhost:3000'
 ```
 
 You can dynamically set `app_url` for each request use a `before_action`:
@@ -85,7 +85,7 @@ GrapeSwaggerRails.options.headers['Special-Header'] = 'Some Secret Value'
 ```
 
 You can set docExpansion with "none" or "list" or "full", default is "none".
-See the official Swagger-UI documentation about [SwaggerUi Parameters](https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md#parameters).
+See the official Swagger-UI documentation about [Swagger UI configuration parameters](https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/).
 
 ```ruby
 GrapeSwaggerRails.options.doc_expansion = 'list'
@@ -93,7 +93,7 @@ GrapeSwaggerRails.options.doc_expansion = 'list'
 
 You can set supportedSubmitMethods with an array of the supported HTTP methods, default is `%w{ get post put delete patch }`.
 
-See the official Swagger-UI documentation about [SwaggerUi Parameters](https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md#parameters).
+See the official Swagger-UI documentation about [Swagger UI configuration parameters](https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/).
 
 ```ruby
 GrapeSwaggerRails.options.supported_submit_methods = ["get"]
@@ -123,8 +123,7 @@ Now you can specify the username and password to your API in the Swagger "API ke
 
     username:password
 
-The javascript that loads on the Swagger page automatically encodes the username and password and adds the authorization header to your API request.
-See the official Swagger documentation about [Custom Header Parameters](https://github.com/wordnik/swagger-ui#custom-header-parameters---for-basic-auth-etc)
+The JavaScript that loads on the Swagger page automatically encodes the username and password and adds the authorization header to your API request via a `requestInterceptor`.
 
 ### Pre-fill Authentication
 
@@ -208,7 +207,7 @@ By default, these options are false.
 
 ### Updating Swagger UI from Dist
 
-To update Swagger UI from its [distribution](https://github.com/wordnik/swagger-ui), run `bundle exec rake swagger_ui:dist:update`. Examine the changes carefully.
+To update Swagger UI from [`swagger-api/swagger-ui`](https://github.com/swagger-api/swagger-ui), run `bundle exec rake swagger_ui:dist:update`. By default the task pulls `v5.32.4`; override it with `SWAGGER_UI_VERSION`, for example `SWAGGER_UI_VERSION=v5.32.4 bundle exec rake swagger_ui:dist:update`.
 
 NOTE: This action should be run part of this gem (not your application). In case if you want to
 make it up-to-date, clone the repo, run the rake task, examine the diff, fix any bugs, make sure
