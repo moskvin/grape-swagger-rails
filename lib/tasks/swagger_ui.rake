@@ -23,14 +23,13 @@ namespace :swagger_ui do
         root = File.expand_path('../..', __dir__)
         dist = File.join(dir, 'swagger-ui', 'dist')
 
-        unless Dir.exist?(dist)
-          raise "Missing dist directory at #{dist}"
-        end
+        raise "Missing dist directory at #{dist}" unless Dir.exist?(dist)
 
-        puts 'Copying JavaScript assets ...'
+        swagger_path = 'app/assets/javascripts/grape_swagger_rails'
+        puts "Copying JavaScript assets #{swagger_path} ..."
         {
-          'swagger-ui-bundle.js' => File.join(root, 'app/assets/javascripts/grape_swagger_rails/swagger-ui-bundle.js'),
-          'swagger-ui-standalone-preset.js' => File.join(root, 'app/assets/javascripts/grape_swagger_rails/swagger-ui-standalone-preset.js')
+          'swagger-ui-bundle.js' => File.join(root, swagger_path, 'swagger-ui-bundle.js'),
+          'swagger-ui-standalone-preset.js' => File.join(root, swagger_path, 'swagger-ui-standalone-preset.js')
         }.each do |source_name, target|
           FileUtils.cp File.join(dist, source_name), target
         end
