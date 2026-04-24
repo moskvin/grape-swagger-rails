@@ -99,6 +99,12 @@ See the official Swagger-UI documentation about [Swagger UI configuration parame
 GrapeSwaggerRails.options.supported_submit_methods = ["get"]
 ```
 
+You can set the initial color theme to `light` or `dark`. Users can still switch themes from the Swagger UI header.
+
+```ruby
+GrapeSwaggerRails.options.theme = 'dark'
+```
+
 You can set validatorUrl to your own locally deployed Swagger validator, or disable validation by setting this option to nil.
 This is useful to avoid error messages when running Swagger-UI on a server which is not accessible from outside your network.
 

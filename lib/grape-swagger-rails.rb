@@ -37,6 +37,8 @@ module GrapeSwaggerRails
     api_key_default_value: '', # Auto populates api_key
     api_key_placeholder: 'api_key', # Placeholder for api_key input
 
+    theme: 'light',
+
     doc_expansion: 'none',
     supported_submit_methods: %w[get post put delete patch],
 

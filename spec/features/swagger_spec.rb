@@ -28,6 +28,20 @@ describe 'Swagger' do
     JS
   end
 
+  def theme_state
+    page.evaluate_script(<<~JS)
+      (function() {
+        var toggle = document.getElementById('theme-toggle');
+
+        return {
+          theme: document.documentElement.dataset.theme,
+          buttonLabel: toggle && toggle.textContent,
+          pressed: toggle && toggle.getAttribute('aria-pressed')
+        };
+      })()
+    JS
+  end
+
   def intercepted_request(url)
     page.evaluate_script(<<~JS, url)
       (function(requestUrl) {
@@ -244,6 +258,47 @@ describe 'Swagger' do
 
         it 'defaults page title' do
           expect(page.title).to eq 'Swagger'
+        end
+      end
+    end
+
+    describe '#theme' do
+      context 'not set' do
+        before do
+          visit_swagger
+        end
+
+        it 'defaults to light mode' do
+          expect(theme_state).to include(
+            'theme' => 'light',
+            'buttonLabel' => 'Dark Mode',
+            'pressed' => 'false'
+          )
+        end
+      end
+
+      context 'set dark' do
+        before do
+          GrapeSwaggerRails.options.theme = 'dark'
+          visit_swagger
+        end
+
+        it 'uses dark mode on load' do
+          expect(theme_state).to include(
+            'theme' => 'dark',
+            'buttonLabel' => 'Light Mode',
+            'pressed' => 'true'
+          )
+        end
+
+        it 'switches back to light mode' do
+          click_button 'Light Mode'
+
+          expect(theme_state).to include(
+            'theme' => 'light',
+            'buttonLabel' => 'Dark Mode',
+            'pressed' => 'false'
+          )
         end
       end
     end
