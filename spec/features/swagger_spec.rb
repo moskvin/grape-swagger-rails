@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
 describe 'Swagger' do
   def visit_swagger
     visit '/swagger'
