@@ -119,6 +119,7 @@
     }
 
     html[data-theme="dark"] .swagger-ui {
+      background: transparent;
       color: #e2e8f0;
     }
 
@@ -320,6 +321,7 @@
 
       function applyTheme(theme) {
         root.dataset.theme = theme;
+        root.classList.toggle('dark-mode', theme === 'dark');
 
         if (!themeToggle) {
           return;
