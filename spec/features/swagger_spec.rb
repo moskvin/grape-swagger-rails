@@ -49,6 +49,33 @@ describe 'Swagger' do
     JS
   end
 
+  def intercepted_request_with_headers_object(url)
+    page.evaluate_script(<<~JS, url)
+      (function(requestUrl) {
+        var request = { url: requestUrl, headers: new Headers() };
+        request = window.ui.getConfigs().requestInterceptor(request);
+
+        return {
+          url: request.url,
+          headers: {
+            testHeader: request.headers.get('X-Test-Header'),
+            anotherHeader: request.headers.get('X-Another-Header'),
+            authorization: request.headers.get('Authorization')
+          }
+        };
+      })(arguments[0])
+    JS
+  end
+
+  def intercepted_request_without_headers(url)
+    page.evaluate_script(<<~JS, url)
+      (function(requestUrl) {
+        var request = { url: requestUrl };
+        return window.ui.getConfigs().requestInterceptor(request);
+      })(arguments[0])
+    JS
+  end
+
   def set_api_key(value)
     find_by_id('input_apiKey').set(value)
   end
@@ -107,6 +134,24 @@ describe 'Swagger' do
         request = intercepted_request('http://localhost:3000/api/headers')
 
         expect(request.fetch('headers').keys).to include('X-Test-Header', 'X-Another-Header')
+      end
+
+      it 'adds headers when the request uses a Headers object' do
+        request = intercepted_request_with_headers_object('http://localhost:3000/api/headers')
+
+        expect(request.fetch('headers')).to include(
+          'testHeader' => 'Test Value',
+          'anotherHeader' => 'Another Value'
+        )
+      end
+
+      it 'initializes request headers when they are missing' do
+        request = intercepted_request_without_headers('http://localhost:3000/api/headers')
+
+        expect(request.fetch('headers')).to include(
+          'X-Test-Header' => 'Test Value',
+          'X-Another-Header' => 'Another Value'
+        )
       end
     end
 
@@ -187,6 +232,14 @@ describe 'Swagger' do
         request = intercepted_request('http://localhost:3000/api/headers')
 
         expect(request.fetch('headers')).to include('Authorization' => 'Token token="token"')
+      end
+
+      it 'adds an Authorization header when the request uses a Headers object' do
+        set_api_key('token')
+
+        request = intercepted_request_with_headers_object('http://localhost:3000/api/headers')
+
+        expect(request.fetch('headers')).to include('authorization' => 'Token token="token"')
       end
     end
 
