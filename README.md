@@ -87,6 +87,17 @@ GrapeSwaggerRails.options.app_url = 'http://localhost:3000'
 
 When multiple specs are configured, the Swagger page renders a specification selector in the header.
 
+To pass native Swagger UI configuration parameters through to the embedded bundle, use `swagger_ui_config`:
+
+```ruby
+GrapeSwaggerRails.options.swagger_ui_config = {
+  defaultModelsExpandDepth: -1,
+  displayRequestDuration: true
+}
+```
+
+These values are merged into the `SwaggerUIBundle(...)` configuration after the gem's defaults are applied.
+
 You can dynamically set `app_url` for each request use a `before_action`:
 
 ```ruby

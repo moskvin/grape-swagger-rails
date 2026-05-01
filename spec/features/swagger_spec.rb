@@ -17,6 +17,8 @@ describe 'Swagger' do
 
         return {
           docExpansion: configs.docExpansion,
+          defaultModelsExpandDepth: configs.defaultModelsExpandDepth,
+          displayRequestDuration: configs.displayRequestDuration,
           supportedSubmitMethods: configs.supportedSubmitMethods,
           validatorUrl: configs.validatorUrl,
           validatorType: typeof configs.validatorUrl,
@@ -193,6 +195,23 @@ describe 'Swagger' do
 
       it 'shows a selector for multiple specs' do
         expect(page).to have_select('spec-selector', selected: 'v2', options: %w[v1 v2])
+      end
+    end
+
+    describe '#swagger_ui_config' do
+      before do
+        GrapeSwaggerRails.options.swagger_ui_config = {
+          'defaultModelsExpandDepth' => -1,
+          'displayRequestDuration' => true
+        }
+        visit_swagger
+      end
+
+      it 'passes native Swagger UI config through to the bundle' do
+        configs = swagger_configs
+
+        expect(configs.fetch('defaultModelsExpandDepth')).to eq(-1)
+        expect(configs.fetch('displayRequestDuration')).to eq(true)
       end
     end
 

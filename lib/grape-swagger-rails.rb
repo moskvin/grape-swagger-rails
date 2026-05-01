@@ -28,6 +28,7 @@ module GrapeSwaggerRails
     url: '/swagger_doc',
     urls: nil,
     urls_primary_name: '',
+    swagger_ui_config: {},
     app_name: 'Swagger',
     app_url: '',
 
