@@ -74,6 +74,19 @@ GrapeSwaggerRails.options.url      = '/swagger_doc.json'
 GrapeSwaggerRails.options.app_url  = 'http://localhost:3000'
 ```
 
+To expose multiple API specifications in the UI, set `urls` instead of a single `url`:
+
+```ruby
+GrapeSwaggerRails.options.urls = [
+  { name: 'v1', url: '/api/v1/swagger_doc' },
+  { name: 'v2', url: '/api/v2/swagger_doc' }
+]
+GrapeSwaggerRails.options.urls_primary_name = 'v2'
+GrapeSwaggerRails.options.app_url = 'http://localhost:3000'
+```
+
+When multiple specs are configured, the Swagger page renders a specification selector in the header.
+
 You can dynamically set `app_url` for each request use a `before_action`:
 
 ```ruby

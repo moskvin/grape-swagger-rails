@@ -89,6 +89,16 @@
       transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
     }
 
+    .swagger-select {
+      min-width: 220px;
+      padding: 10px 12px;
+      border: 1px solid var(--swagger-input-border);
+      border-radius: 6px;
+      background: var(--swagger-input-background);
+      color: var(--swagger-input-color);
+      transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
     .swagger-input::placeholder {
       color: var(--swagger-input-placeholder);
     }
@@ -212,6 +222,7 @@
       }
 
       .swagger-input,
+      .swagger-select,
       .swagger-theme-toggle {
         width: 100%;
         min-width: 0;
@@ -290,6 +301,10 @@
   <header class="swagger-header">
     <a class="swagger-brand" href="<%= GrapeSwaggerRails.options.app_url %>"><%= GrapeSwaggerRails.options.app_name %></a>
     <div class="swagger-controls">
+      <label id="spec-selector-wrapper" class="swagger-auth" hidden>
+        <span class="swagger-label">Specification</span>
+        <select id="spec-selector" class="swagger-select" name="spec-selector"></select>
+      </label>
       <button id="theme-toggle" class="swagger-theme-toggle" type="button" aria-pressed="false">Dark Mode</button>
       <label class="swagger-auth">
         <span class="swagger-label"><%= GrapeSwaggerRails.options.api_key_placeholder %></span>
@@ -312,6 +327,8 @@
     (function() {
       var options = JSON.parse(document.documentElement.dataset.swaggerOptions);
       var authInput = document.getElementById('input_apiKey');
+      var specSelector = document.getElementById('spec-selector');
+      var specSelectorWrapper = document.getElementById('spec-selector-wrapper');
       var themeToggle = document.getElementById('theme-toggle');
       var root = document.documentElement;
 
@@ -357,6 +374,88 @@
         return key;
       }
 
+      function absoluteSpecUrl(url) {
+        if (!url) {
+          return '';
+        }
+
+        if (/^https?:\/\//.test(url)) {
+          return url;
+        }
+
+        return options.app_url + url;
+      }
+
+      function normalizeSwaggerUrls() {
+        if (!Array.isArray(options.urls)) {
+          return [];
+        }
+
+        return options.urls.map(function(entry, index) {
+          if (typeof entry === 'string') {
+            return {
+              name: entry,
+              url: absoluteSpecUrl(entry),
+              index: index
+            };
+          }
+
+          return {
+            name: entry.name || entry.url || ('Spec ' + (index + 1)),
+            url: absoluteSpecUrl(entry.url),
+            index: index
+          };
+        }).filter(function(entry) {
+          return !!entry.url;
+        });
+      }
+
+      function selectedSwaggerUrl(urls) {
+        if (!urls.length) {
+          return null;
+        }
+
+        if (options.urls_primary_name) {
+          for (var i = 0; i < urls.length; i += 1) {
+            if (urls[i].name === options.urls_primary_name) {
+              return urls[i];
+            }
+          }
+        }
+
+        if (options.url) {
+          var absoluteUrl = absoluteSpecUrl(options.url);
+
+          for (var j = 0; j < urls.length; j += 1) {
+            if (urls[j].url === absoluteUrl) {
+              return urls[j];
+            }
+          }
+        }
+
+        return urls[0];
+      }
+
+      function setupSpecSelector(urls, selectedUrl) {
+        if (!specSelector || !specSelectorWrapper || urls.length < 2) {
+          return;
+        }
+
+        urls.forEach(function(entry) {
+          var option = document.createElement('option');
+          option.value = entry.url;
+          option.textContent = entry.name;
+
+          if (selectedUrl && entry.url === selectedUrl.url) {
+            option.selected = true;
+          }
+
+          specSelector.appendChild(option);
+        });
+
+        specSelectorWrapper.hidden = false;
+      }
+
       function ensureRequestHeaders(request) {
         if (!request.headers) {
           request.headers = {};
@@ -378,6 +477,9 @@
 
       applyTheme(getTheme());
 
+      var swaggerUrls = normalizeSwaggerUrls();
+      var selectedUrl = selectedSwaggerUrl(swaggerUrls);
+
       if (themeToggle) {
         themeToggle.addEventListener('click', function() {
           options.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -385,8 +487,7 @@
         });
       }
 
-      window.ui = SwaggerUIBundle({
-        url: options.app_url + options.url,
+      var swaggerUiConfig = {
         dom_id: '#swagger-ui-container',
         deepLinking: true,
         docExpansion: options.doc_expansion,
@@ -417,7 +518,34 @@
           setRequestHeader(request, options.api_key_name, apiKeyValue);
           return request;
         }
-      });
+      };
+
+      if (swaggerUrls.length) {
+        swaggerUiConfig.urls = swaggerUrls.map(function(entry) {
+          return {
+            name: entry.name,
+            url: entry.url
+          };
+        });
+
+        if (selectedUrl) {
+          swaggerUiConfig['urls.primaryName'] = selectedUrl.name;
+        }
+      } else {
+        swaggerUiConfig.url = absoluteSpecUrl(options.url);
+      }
+
+      window.ui = SwaggerUIBundle(swaggerUiConfig);
+
+      setupSpecSelector(swaggerUrls, selectedUrl);
+
+      if (specSelector && swaggerUrls.length > 1) {
+        specSelector.addEventListener('change', function(event) {
+          var url = event.target.value;
+          window.ui.specActions.updateUrl(url);
+          window.ui.specActions.download(url);
+        });
+      }
     })();
   </script>
 </body>

@@ -20,7 +20,13 @@ describe 'Swagger' do
           supportedSubmitMethods: configs.supportedSubmitMethods,
           validatorUrl: configs.validatorUrl,
           validatorType: typeof configs.validatorUrl,
-          url: configs.url
+          url: configs.url,
+          urls: configs.urls && configs.urls.map(function(entry) {
+            return {
+              name: entry.name,
+              url: entry.url
+            };
+          })
         };
       })()
     JS
@@ -160,6 +166,33 @@ describe 'Swagger' do
           'X-Test-Header' => 'Test Value',
           'X-Another-Header' => 'Another Value'
         )
+      end
+    end
+
+    describe '#urls' do
+      before do
+        GrapeSwaggerRails.options.urls = [
+          { name: 'v1', url: '/api/swagger_doc' },
+          { name: 'v2', url: '/api/v2/swagger_doc' }
+        ]
+        GrapeSwaggerRails.options.urls_primary_name = 'v2'
+        GrapeSwaggerRails.options.url = '/api/swagger_doc'
+        visit_swagger
+      end
+
+      it 'passes multiple spec URLs to Swagger UI' do
+        configs = swagger_configs
+
+        expect(configs.fetch('urls')).to eq(
+          [
+            { 'name' => 'v1', 'url' => 'http://localhost:3000/api/swagger_doc' },
+            { 'name' => 'v2', 'url' => 'http://localhost:3000/api/v2/swagger_doc' }
+          ]
+        )
+      end
+
+      it 'shows a selector for multiple specs' do
+        expect(page).to have_select('spec-selector', selected: 'v2', options: %w[v1 v2])
       end
     end
 
