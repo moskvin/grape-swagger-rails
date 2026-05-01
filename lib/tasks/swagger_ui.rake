@@ -8,7 +8,7 @@ namespace :swagger_ui do
   namespace :dist do
     desc 'Update Swagger UI assets from swagger-api/swagger-ui.'
     task :update do
-      version = ENV.fetch('SWAGGER_UI_VERSION', 'v5.32.4')
+      version = ENV.fetch('SWAGGER_UI_VERSION', 'v5.32.5')
 
       Dir.mktmpdir('swagger-ui') do |dir|
         puts "Cloning swagger-api/swagger-ui #{version} into #{dir} ..."
@@ -37,6 +37,13 @@ namespace :swagger_ui do
         puts 'Copying stylesheet assets ...'
         FileUtils.cp File.join(dist, 'swagger-ui.css'),
                      File.join(root, 'app/assets/stylesheets/grape_swagger_rails/swagger-ui.css')
+
+        semver = version.sub(/\Av/, '')
+        version_file = File.join(root, 'lib/grape-swagger-rails/version.rb')
+        content = File.read(version_file)
+        updated = content.gsub(/SWAGGER_UI_VERSION = '[^']*'/, "SWAGGER_UI_VERSION = '#{semver}'")
+        File.write(version_file, updated)
+        puts "Updated SWAGGER_UI_VERSION to #{semver} in #{version_file}"
       end
     end
   end
