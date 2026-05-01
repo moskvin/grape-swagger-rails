@@ -97,6 +97,14 @@ describe 'Swagger' do
     it 'loads Swagger UI' do
       expect(page.evaluate_script('typeof window.ui')).to eq 'object'
     end
+
+    it 'loads the configured swagger document URL' do
+      expect(swagger_configs.fetch('url')).to eq 'http://localhost:3000/api/swagger_doc'
+    end
+
+    it 'shows the Swagger 2 document badge' do
+      expect(page).to have_css('.swagger-ui .info .version', text: 'OAS 2.0')
+    end
   end
 
   describe '#options' do

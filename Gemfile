@@ -4,11 +4,19 @@ source 'https://rubygems.org'
 
 gemspec
 
+case grape_version = ENV['GRAPE_VERSION']
+when nil, ''
+  gem 'grape', '>= 1.3.0'
+when 'HEAD'
+  gem 'grape', github: 'ruby-grape/grape'
+else
+  gem 'grape', grape_version
+end
+
 case grape_swagger_version = ENV.fetch('GRAPE_SWAGGER_VERSION', '~> 1.6.0')
 when 'HEAD'
   gem 'grape-swagger', github: 'ruby-grape/grape-swagger'
 else
-  gem 'grape', '>= 1.3.0'
   gem 'grape-swagger', grape_swagger_version
 end
 

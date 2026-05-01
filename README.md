@@ -39,15 +39,17 @@ Or install it yourself as:
 
 ## Compatibility
 
-GrapeSwaggerRails is compatible with the following versions of grape and grape-swagger.
+This gem is continuously tested against the following stack:
 
-| grape  | grape-swagger |
-|--------|---------------|
-| 0.9.0  | 0.8.0         |
-| 0.10.0 | 0.9.0         |
-| 0.16.2 | 0.20.2        |
-| 1.8.0  | 1.6.1         |
-| 2.2.0  | 2.1.1         |
+| Ruby | Rails   | Grape   | grape-swagger | Swagger UI |
+|-----:|--------:|--------:|--------------:|-----------:|
+| 3.4  | 7.2.2.2 | 1.8.x   | 1.6.1         | 5.32.4     |
+| 3.2+ | 7.2.2.2 | 3.1.x   | 2.1.4         | 5.32.4     |
+| 3.2+ | 8.1.x   | 3.1.x   | 2.1.4         | 5.32.4     |
+
+The dummy app and CI also exercise both supported Rails asset pipelines: Sprockets and Propshaft.
+
+If you use a nearby version and hit an issue, please open one with your `Gemfile.lock` and a minimal reproduction.
 
 ## Usage
 
