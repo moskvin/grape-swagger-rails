@@ -88,6 +88,18 @@ describe 'Swagger' do
     find_by_id('input_apiKey').set(value)
   end
 
+  def open_operation(tag_id, operation_id)
+    find("##{tag_id} .expand-operation").click
+    find("##{operation_id} .opblock-control-arrow").click
+  end
+
+  def execute_operation(operation_id)
+    within("##{operation_id}") do
+      find('.try-out__btn').click
+      find('.execute').click
+    end
+  end
+
   it "uses grape-swagger=#{GrapeSwagger::VERSION} grape-swagger-rails=#{GrapeSwaggerRails::VERSION}" do
     expect(GrapeSwagger::VERSION).not_to be_blank
     expect(GrapeSwaggerRails::VERSION).not_to be_blank
@@ -112,6 +124,37 @@ describe 'Swagger' do
 
     it 'shows the Swagger 2 document badge' do
       expect(page).to have_css('.swagger-ui .info .version', text: 'OAS 2.0')
+    end
+
+    it 'executes a GET request through Swagger UI and applies custom headers' do
+      GrapeSwaggerRails.options.headers['X-Test-Header'] = 'Smoke'
+
+      visit_swagger
+      open_operation('operations-tag-headers', 'operations-headers-getApiHeaders')
+      execute_operation('operations-headers-getApiHeaders')
+
+      expect(page).to have_text('"X-Test-Header": "Smoke"')
+      expect(page).to have_text("curl -X 'GET'")
+    end
+
+    it 'executes a POST request through Swagger UI and submits form data' do
+      GrapeSwaggerRails.options.headers['X-Test-Header'] = 'Smoke'
+
+      visit_swagger
+      open_operation('operations-tag-echo', 'operations-echo-postApiEcho')
+
+      within('#operations-echo-postApiEcho') do
+        find('.try-out__btn').click
+        find('tr[data-param-name="name"] input').set('Widget')
+        find('tr[data-param-name="enabled"] select').find('option', text: 'true').select_option
+        find('.execute').click
+      end
+
+      expect(page).to have_text('"body": "name=Widget&enabled=true"')
+      expect(page).to have_text('"content_type": "application/x-www-form-urlencoded"')
+      expect(page).to have_text('"name": "Widget"')
+      expect(page).to have_text('"enabled": true')
+      expect(page).to have_text('"X-Test-Header": "Smoke"')
     end
   end
 
