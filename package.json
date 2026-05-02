@@ -1,0 +1,12 @@
+{
+  "name": "grape-swagger-rails",
+  "private": true,
+  "packageManager": "yarn@4.14.1",
+  "scripts": {
+    "build:frontend": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
