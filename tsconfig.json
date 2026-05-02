@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "none",
+    "lib": ["DOM", "ES2017"],
+    "strict": true,
+    "noEmitOnError": true,
+    "skipLibCheck": true,
+    "outFile": "app/assets/javascripts/grape_swagger_rails/index.js"
+  },
+  "files": ["frontend/grape_swagger_rails/index.ts"]
+}
