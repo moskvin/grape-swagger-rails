@@ -16,6 +16,7 @@ module GrapeSwaggerRails
           grape_swagger_rails/favicon.ico
           grape_swagger_rails/swagger-ui.css
           grape_swagger_rails/index.css
+          grape_swagger_rails/index.js
           grape_swagger_rails/swagger-ui-bundle.js
           grape_swagger_rails/swagger-ui-standalone-preset.js
           grape_swagger_rails/favicon-16x16.png
