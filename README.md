@@ -10,6 +10,7 @@ Swagger UI as Rails Engine for grape-swagger gem.
 - [Installation](#installation)
 - [Compatibility](#compatibility)
 - [Usage](#usage)
+  - [Overriding the Swagger UI Template](#overriding-the-swagger-ui-template)
   - [Basic Authentication](#basic-authentication)
   - [Pre-fill Authentication](#pre-fill-authentication)
   - [API Token Authentication](#api-token-authentication)
@@ -106,6 +107,14 @@ GrapeSwaggerRails.options.before_action do
 end
 ```
 
+Be careful with request-time mutation of `GrapeSwaggerRails.options`. This object is global process state, so mutating nested values such as `app_url`, `headers`, or authentication defaults inside `before_action` can leak across requests in threaded app servers.
+
+Safer patterns:
+
+- Prefer assigning request-specific values directly in the controller/view path rather than mutating shared global options.
+- If you must derive request-specific values in `before_action`, overwrite the full value you need for that request and avoid incremental mutation of shared hashes.
+- Be especially careful with code like `GrapeSwaggerRails.options.headers['X-Header'] = ...`, which mutates a shared hash in place.
+
 You can set the app name, default is "Swagger".
 
 ``` ruby
@@ -148,6 +157,30 @@ GrapeSwaggerRails.options.validator_url = nil
 
 Using the `headers` option above, you could hard-code Basic Authentication credentials.
 Alternatively, you can configure Basic Authentication through the UI, as described below.
+
+### Overriding the Swagger UI Template
+
+If you need to customize the page layout or script includes, prefer a local Rails view override instead of editing the gem's template directly.
+
+Create a host-application view at:
+
+```text
+app/views/grape_swagger_rails/application/index.html.haml
+```
+
+and copy the current engine template as a starting point. The engine's default template lives at:
+
+```text
+app/views/grape_swagger_rails/application/index.html.haml
+```
+
+If you also need to customize the maintained browser runtime, reference your own asset from the overridden template instead of editing the gem asset in place. The engine's maintained runtime is:
+
+```text
+app/assets/javascripts/grape_swagger_rails/index.js
+```
+
+This keeps application-specific branding and behavior changes local to the host app and makes gem upgrades easier to review.
 
 ### Basic Authentication
 
