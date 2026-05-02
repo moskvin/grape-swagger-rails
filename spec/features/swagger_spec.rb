@@ -10,6 +10,12 @@ describe 'Swagger' do
     page.evaluate_script('JSON.parse(document.documentElement.dataset.swaggerOptions)')
   end
 
+  def swagger_document
+    session = Capybara::Session.new(:rack_test, Rails.application)
+    session.visit('/api/swagger_doc')
+    JSON.parse(session.html)
+  end
+
   def swagger_configs
     page.evaluate_script(<<~JS)
       (function() {
@@ -124,6 +130,25 @@ describe 'Swagger' do
 
     it 'shows the Swagger 2 document badge' do
       expect(page).to have_css('.swagger-ui .info .version', text: 'OAS 2.0')
+    end
+
+    it 'serves a Swagger 2 document' do
+      document = swagger_document
+
+      expect(document['swagger']).to eq('2.0')
+      expect(document).not_to have_key('openapi')
+      expect(document.fetch('paths')).to include('/api/headers', '/api/echo')
+    end
+
+    it 'documents the echo endpoint as form data with form encoding' do
+      document = swagger_document
+      operation = document.fetch('paths').fetch('/api/echo').fetch('post')
+
+      expect(operation.fetch('consumes')).to eq(['application/x-www-form-urlencoded'])
+      expect(operation.fetch('parameters')).to include(
+        a_hash_including('in' => 'formData', 'name' => 'name', 'type' => 'string'),
+        a_hash_including('in' => 'formData', 'name' => 'enabled', 'type' => 'boolean')
+      )
     end
 
     it 'executes a GET request through Swagger UI and applies custom headers' do
