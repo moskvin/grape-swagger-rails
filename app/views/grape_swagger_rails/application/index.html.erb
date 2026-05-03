@@ -2,135 +2,425 @@
 <html data-swagger-options="<%= GrapeSwaggerRails.options.marshal_dump.to_json %>">
 <head>
   <title><%= GrapeSwaggerRails.options.app_name || 'Swagger UI' %></title>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
-  <% if defined?(Propshaft::Railtie) && Rails.application.assets.is_a?(Propshaft::Assembly) %>
-    <%= stylesheet_link_tag 'grape_swagger_rails/reset', media: 'all' %>
-    <%= stylesheet_link_tag 'grape_swagger_rails/screen-propshaft', media: 'all' %>
-
-    <%= javascript_include_tag 'grape_swagger_rails/jquery-1.8.0.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jquery.slideto.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jquery.wiggle.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jquery.ba-bbq.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/handlebars-2.0.0' %>
-    <%= javascript_include_tag 'grape_swagger_rails/marked' %>
-    <%= javascript_include_tag 'grape_swagger_rails/lodash.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/backbone-min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/swagger-ui.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/highlight.9.1.0.pack' %>
-    <%= javascript_include_tag 'grape_swagger_rails/js-yaml.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jsoneditor.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/object-assign-pollyfill' %>
-    <%= javascript_include_tag 'grape_swagger_rails/swagger-oauth' %>
-    <%= javascript_include_tag 'grape_swagger_rails/base64' %>
-  <% else %>
-    <%= stylesheet_link_tag 'grape_swagger_rails/application', media: 'all' %>
-    <%= javascript_include_tag 'grape_swagger_rails/application' %>
-  <% end %>
-  <script type="text/javascript">
-	$(function () {
-	  var options = $("html").data('swagger-options');
-
-    var headers = {};
-    <% GrapeSwaggerRails.options.headers.each_with_index do |(key, value), index| %>
-      <%=raw "headers.header_#{index} = new SwaggerClient.ApiKeyAuthorization('#{CGI.escapeHTML(key)}', '#{CGI.escapeHTML(value)}', 'header');" %>
-    <% end %>
-
-    <% if GrapeSwaggerRails.options.api_key_default_value.try(:strip).present? &&
-          GrapeSwaggerRails.options.headers['Authorization'].blank? %>
-      <% headers_count = GrapeSwaggerRails.options.headers.count %>
-      <%= raw "headers.header_#{headers_count} = getApiKeyAuthorization();" %>
-    <% end %>
-
-    window.swaggerUi = new SwaggerUi({
-      url: options.app_url + options.url,
-      dom_id: "swagger-ui-container",
-      supportHeaderParams: true,
-      supportedSubmitMethods: options.supported_submit_methods || [],
-      authorizations: headers,
-      onComplete: function(swaggerApi, swaggerUi){
-        if('console' in window) {
-          console.log("Loaded SwaggerUI")
-          console.log(swaggerApi);
-          console.log(swaggerUi);
-        }
-        $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
-      },
-      onFailure: function(data) {
-        if('console' in window) {
-          console.log("Unable to Load SwaggerUI");
-          console.log(data);
-        }
-      },
-      docExpansion: options.doc_expansion,
-      validatorUrl: options.validator_url,
-      apisSorter: "alpha"
-    });
-
-    function getApiKeyAuthorization() {
-      var key = $('#input_apiKey')[0].value;
-
-      if (key && key.trim() != "") {
-        if (options.api_auth == 'basic') {
-          key = "Basic " + Base64.encode(key);
-        } else if (options.api_auth == 'bearer') {
-          key = "Bearer " + key;
-        } else if (options.api_auth == 'token') {
-          key = 'Token token="' + key + '"';
-        }
-        return new SwaggerClient.ApiKeyAuthorization(options.api_key_name, key, options.api_key_type);
-      }
-    }
-
-    function addApiKeyAuthorization() {
-      var apiKeyAuthorization = getApiKeyAuthorization();
-      if (apiKeyAuthorization) {
-        window.swaggerUi.api.clientAuthorizations.add("key", apiKeyAuthorization);
-      }
-    }
-
-    $('#input_apiKey').change(addApiKeyAuthorization);
-
-    window.swaggerUi.load();
-
-  });
-  </script>
+  <%= stylesheet_link_tag 'grape_swagger_rails/swagger-ui', media: 'all' %>
+  <%= stylesheet_link_tag 'grape_swagger_rails/index', media: 'all' %>
   <style>
-    input#input_baseUrl, a#explore.exploreBtn {
-      <% if GrapeSwaggerRails.options.hide_url_input %>
-      display: none;
-      <% end %>
+    :root {
+      --swagger-page-background: #f5f7fb;
+      --swagger-page-color: #122033;
+      --swagger-header-background: #122033;
+      --swagger-header-color: #fff;
+      --swagger-label-color: rgba(255, 255, 255, 0.78);
+      --swagger-input-border: rgba(255, 255, 255, 0.18);
+      --swagger-input-background: rgba(255, 255, 255, 0.12);
+      --swagger-input-color: #fff;
+      --swagger-input-placeholder: rgba(255, 255, 255, 0.62);
+      --swagger-toggle-background: rgba(255, 255, 255, 0.12);
+      --swagger-toggle-border: rgba(255, 255, 255, 0.18);
+      --swagger-toggle-color: #fff;
+      color-scheme: light;
     }
 
-    input#input_apiKey {
-      <% if GrapeSwaggerRails.options.hide_api_key_input %>
-      display: none;
-      <% end %>
+    html[data-theme="dark"] {
+      --swagger-page-background: #0b1220;
+      --swagger-page-color: #e2e8f0;
+      --swagger-header-background: #020817;
+      --swagger-header-color: #f8fafc;
+      --swagger-label-color: rgba(226, 232, 240, 0.78);
+      --swagger-input-border: rgba(148, 163, 184, 0.4);
+      --swagger-input-background: rgba(15, 23, 42, 0.92);
+      --swagger-input-color: #f8fafc;
+      --swagger-input-placeholder: rgba(148, 163, 184, 0.9);
+      --swagger-toggle-background: rgba(15, 23, 42, 0.92);
+      --swagger-toggle-border: rgba(148, 163, 184, 0.4);
+      --swagger-toggle-color: #f8fafc;
+      color-scheme: dark;
     }
+
+    body {
+      margin: 0;
+      background: var(--swagger-page-background);
+      color: var(--swagger-page-color);
+      font-family: Helvetica, Arial, sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .swagger-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 20px;
+      background: var(--swagger-header-background);
+      color: var(--swagger-header-color);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .swagger-brand {
+      color: inherit;
+      text-decoration: none;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .swagger-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .swagger-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--swagger-label-color);
+    }
+
+    .swagger-input {
+      min-width: 280px;
+      padding: 10px 12px;
+      border: 1px solid var(--swagger-input-border);
+      border-radius: 6px;
+      background: var(--swagger-input-background);
+      color: var(--swagger-input-color);
+      transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .swagger-input::placeholder {
+      color: var(--swagger-input-placeholder);
+    }
+
+    .swagger-theme-toggle {
+      padding: 10px 14px;
+      border: 1px solid var(--swagger-toggle-border);
+      border-radius: 999px;
+      background: var(--swagger-toggle-background);
+      color: var(--swagger-toggle-color);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .swagger-theme-toggle:hover {
+      opacity: 0.92;
+    }
+
+    #swagger-ui-container {
+      min-height: calc(100vh - 72px);
+    }
+
+    .swagger-ui .topbar {
+      display: none;
+    }
+
+    html[data-theme="dark"] .swagger-ui {
+      background: transparent;
+      color: #e2e8f0;
+    }
+
+    html[data-theme="dark"] .swagger-ui,
+    html[data-theme="dark"] .swagger-ui .info,
+    html[data-theme="dark"] .swagger-ui section.models,
+    html[data-theme="dark"] .swagger-ui .scheme-container,
+    html[data-theme="dark"] .swagger-ui .opblock-tag,
+    html[data-theme="dark"] .swagger-ui .opblock .opblock-summary,
+    html[data-theme="dark"] .swagger-ui .opblock .opblock-section-header,
+    html[data-theme="dark"] .swagger-ui .responses-inner h4,
+    html[data-theme="dark"] .swagger-ui .responses-inner h5,
+    html[data-theme="dark"] .swagger-ui table thead tr td,
+    html[data-theme="dark"] .swagger-ui table thead tr th {
+      color: #e2e8f0;
+    }
+
+    html[data-theme="dark"] .swagger-ui .scheme-container,
+    html[data-theme="dark"] .swagger-ui section.models,
+    html[data-theme="dark"] .swagger-ui .model-container,
+    html[data-theme="dark"] .swagger-ui .responses-inner,
+    html[data-theme="dark"] .swagger-ui .opblock .opblock-section-header,
+    html[data-theme="dark"] .swagger-ui .opblock-body pre,
+    html[data-theme="dark"] .swagger-ui .highlight-code,
+    html[data-theme="dark"] .swagger-ui .microlight,
+    html[data-theme="dark"] .swagger-ui .renderedMarkdown code,
+    html[data-theme="dark"] .swagger-ui .renderedMarkdown pre {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    html[data-theme="dark"] .swagger-ui .info a,
+    html[data-theme="dark"] .swagger-ui .opblock-tag,
+    html[data-theme="dark"] .swagger-ui .opblock-tag small,
+    html[data-theme="dark"] .swagger-ui .opblock-summary-path,
+    html[data-theme="dark"] .swagger-ui .opblock-summary-description,
+    html[data-theme="dark"] .swagger-ui .parameter__name,
+    html[data-theme="dark"] .swagger-ui .parameter__type,
+    html[data-theme="dark"] .swagger-ui .response-col_status,
+    html[data-theme="dark"] .swagger-ui .response-col_links,
+    html[data-theme="dark"] .swagger-ui label,
+    html[data-theme="dark"] .swagger-ui .tab li,
+    html[data-theme="dark"] .swagger-ui .model-title,
+    html[data-theme="dark"] .swagger-ui .prop-name {
+      color: #ffffff;
+    }
+
+    html[data-theme="dark"] .swagger-ui input[type="text"],
+    html[data-theme="dark"] .swagger-ui input[type="password"],
+    html[data-theme="dark"] .swagger-ui input[type="search"],
+    html[data-theme="dark"] .swagger-ui input[type="email"],
+    html[data-theme="dark"] .swagger-ui input[type="file"],
+    html[data-theme="dark"] .swagger-ui textarea,
+    html[data-theme="dark"] .swagger-ui select {
+      background: #111827;
+      color: #f8fafc;
+      border-color: #334155;
+    }
+
+    html[data-theme="dark"] .swagger-ui .btn,
+    html[data-theme="dark"] .swagger-ui .model-box {
+      border-color: #475569;
+    }
+
+    @media (max-width: 767px) {
+      .swagger-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+      }
+
+      .swagger-brand {
+        font-size: 20px;
+        line-height: 1.2;
+      }
+
+      .swagger-controls {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .swagger-auth {
+        width: 100%;
+      }
+
+      .swagger-label {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .swagger-input,
+      .swagger-theme-toggle {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      #swagger-ui-container {
+        min-height: calc(100vh - 152px);
+      }
+
+      .swagger-ui {
+        font-size: 15px;
+      }
+
+      .swagger-ui .wrapper {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .swagger-ui .info {
+        margin: 24px 0;
+      }
+
+      .swagger-ui .info .title {
+        font-size: 34px;
+        line-height: 1.1;
+        word-break: break-word;
+      }
+
+      .swagger-ui .opblock-tag {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 8px 12px;
+        padding-top: 18px;
+        padding-bottom: 18px;
+        padding-right: 44px;
+      }
+
+      .swagger-ui .opblock-tag-section h3 {
+        min-width: 0;
+        margin: 0;
+        line-height: 1.15;
+        word-break: break-word;
+      }
+
+      .swagger-ui .opblock-tag small {
+        flex: 1 1 100%;
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.35;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      .swagger-ui .expand-operation {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        margin: 0;
+        transform: translateY(-50%);
+      }
+    }
+
+    <% if GrapeSwaggerRails.options.hide_api_key_input %>
+    .swagger-auth {
+      display: none;
+    }
+    <% end %>
   </style>
 </head>
 
-<body class="swagger-section">
-<div id='header'>
-  <div class="swagger-ui-wrap">
-    <a id="logo" href="<%= GrapeSwaggerRails.options.app_url %>"><%= GrapeSwaggerRails.options.app_name %></a>
+<body>
+  <header class="swagger-header">
+    <a class="swagger-brand" href="<%= GrapeSwaggerRails.options.app_url %>"><%= GrapeSwaggerRails.options.app_name %></a>
+    <div class="swagger-controls">
+      <button id="theme-toggle" class="swagger-theme-toggle" type="button" aria-pressed="false">Dark Mode</button>
+      <label class="swagger-auth">
+        <span class="swagger-label"><%= GrapeSwaggerRails.options.api_key_placeholder %></span>
+        <input
+          id="input_apiKey"
+          class="swagger-input"
+          name="apiKey"
+          type="text"
+          value="<%= GrapeSwaggerRails.options.api_key_default_value %>"
+          placeholder="<%= GrapeSwaggerRails.options.api_key_placeholder %>">
+      </label>
+    </div>
+  </header>
 
-    <form id='api_selector'>
-      <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>
-      <div class='input'><input placeholder="<%= GrapeSwaggerRails.options.api_key_placeholder %>" id="input_apiKey" name="apiKey" type="text" value="<%= GrapeSwaggerRails.options.api_key_default_value %>"/></div>
-      <div class='input'><a id="explore" class="exploreBtn" href="#">Explore</a></div>
-    </form>
-  </div>
-</div>
+  <div id="swagger-ui-container"></div>
 
-<div id="message-bar" class="swagger-ui-wrap">
-  &nbsp;
-</div>
+  <%= javascript_include_tag 'grape_swagger_rails/swagger-ui-bundle' %>
+  <%= javascript_include_tag 'grape_swagger_rails/swagger-ui-standalone-preset' %>
+  <script>
+    (function() {
+      var options = JSON.parse(document.documentElement.dataset.swaggerOptions);
+      var authInput = document.getElementById('input_apiKey');
+      var themeToggle = document.getElementById('theme-toggle');
+      var root = document.documentElement;
 
-<div id="swagger-ui-container" class="swagger-ui-wrap">
+      function getTheme() {
+        return options.theme === 'dark' ? 'dark' : 'light';
+      }
 
-</div>
+      function applyTheme(theme) {
+        root.dataset.theme = theme;
+        root.classList.toggle('dark-mode', theme === 'dark');
 
+        if (!themeToggle) {
+          return;
+        }
+
+        themeToggle.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+      }
+
+      function getApiKeyValue() {
+        if (!authInput) {
+          return '';
+        }
+
+        var key = authInput.value ? authInput.value.trim() : '';
+
+        if (!key) {
+          return '';
+        }
+
+        if (options.api_auth === 'basic') {
+          return 'Basic ' + btoa(key);
+        }
+
+        if (options.api_auth === 'bearer') {
+          return 'Bearer ' + key;
+        }
+
+        if (options.api_auth === 'token') {
+          return 'Token token="' + key + '"';
+        }
+
+        return key;
+      }
+
+      function ensureRequestHeaders(request) {
+        if (!request.headers) {
+          request.headers = {};
+        }
+
+        return request.headers;
+      }
+
+      function setRequestHeader(request, key, value) {
+        var headers = ensureRequestHeaders(request);
+
+        if (headers instanceof Headers) {
+          headers.set(key, value);
+          return;
+        }
+
+        headers[key] = value;
+      }
+
+      applyTheme(getTheme());
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+          options.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+          applyTheme(options.theme);
+        });
+      }
+
+      var specUrl = options.app_url ? options.app_url + options.url : options.url;
+
+      window.ui = SwaggerUIBundle({
+        url: specUrl,
+        dom_id: '#swagger-ui-container',
+        deepLinking: true,
+        docExpansion: options.doc_expansion,
+        supportedSubmitMethods: options.supported_submit_methods || [],
+        validatorUrl: options.validator_url,
+        layout: 'BaseLayout',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        requestInterceptor: function(request) {
+          var headers = options.headers || {};
+          Object.keys(headers).forEach(function(key) {
+            setRequestHeader(request, key, headers[key]);
+          });
+
+          var apiKeyValue = getApiKeyValue();
+          if (!apiKeyValue) {
+            return request;
+          }
+
+          if (options.api_key_type === 'query') {
+            var separator = request.url.indexOf('?') === -1 ? '?' : '&';
+            request.url += separator + encodeURIComponent(options.api_key_name) + '=' + encodeURIComponent(apiKeyValue);
+            return request;
+          }
+
+          setRequestHeader(request, options.api_key_name, apiKeyValue);
+          return request;
+        }
+      });
+    })();
+  </script>
 </body>
-
 </html>
