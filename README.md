@@ -9,6 +9,7 @@ Swagger UI as Rails Engine for grape-swagger gem.
 
 - [Installation](#installation)
 - [Compatibility](#compatibility)
+  - [Support Policy](#support-policy)
 - [Usage](#usage)
   - [Basic Authentication](#basic-authentication)
   - [Pre-fill Authentication](#pre-fill-authentication)
