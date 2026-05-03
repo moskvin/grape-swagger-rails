@@ -8,6 +8,6 @@ describe 'Welcome' do
   end
 
   it 'renders a link to swagger' do
-    expect(page).to have_css 'a[href="/swagger"]'
+    expect(page).to have_link(href: '/swagger')
   end
 end

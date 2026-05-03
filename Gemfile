@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-case grape_version = ENV['GRAPE_VERSION']
+case grape_version = ENV.fetch('GRAPE_VERSION', nil)
 when nil, ''
   gem 'grape', '>= 1.3.0'
 when 'HEAD'
