@@ -5,6 +5,7 @@ ENV['RAILS_ENV'] ||= 'test'
 asset_pipeline = ENV.fetch('ASSET_PIPELINE', 'sprockets')
 case asset_pipeline
 when 'propshaft'
+  require 'active_support'
   require 'rails/railtie'
   require 'propshaft'
 else
