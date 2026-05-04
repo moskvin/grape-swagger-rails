@@ -196,7 +196,7 @@ describe 'Swagger' do
 
       it 'denies access' do
         expect(page).to have_current_path '/', ignore_query: true
-        expect(page).to have_content 'Unauthorized Access'
+        expect(page).to have_text 'Unauthorized Access'
       end
     end
 
