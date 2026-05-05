@@ -14,11 +14,6 @@ Capybara/ClickLinkOrButtonStyle:
     - 'spec/features/swagger_spec.rb'
 
 # Offense count: 1
-Capybara/SpecificMatcher:
-  Exclude:
-    - 'spec/features/welcome_spec.rb'
-
-# Offense count: 1
 # Configuration parameters: Severity, Include.
 # Include: **/*.gemspec
 Gemspec/RequiredRubyVersion:
@@ -36,6 +31,11 @@ Lint/ConstantDefinitionInBlock:
 Lint/MixedRegexpCaptureTypes:
   Exclude:
     - 'lib/tasks/swagger_ui.rake'
+
+# Offense count: 3
+RSpec/Output:
+  Exclude:
+    - 'spec/dummy/bin/setup'
 
 # Offense count: 4
 # Configuration parameters: CountComments, CountAsOne, AllowedMethods, AllowedPatterns, inherit_mode.
