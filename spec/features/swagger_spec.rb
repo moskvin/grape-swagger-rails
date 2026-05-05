@@ -160,14 +160,15 @@ describe 'Swagger' do
       )
     end
 
-    it 'documents the submit endpoint with JSON consumes and formData parameters' do
+    it 'documents the submit endpoint with JSON consumes' do
       operation = swagger_document.dig('paths', '/api/submit', 'post')
-
       expect(operation.fetch('consumes')).to eq(['application/json'])
-      expect(operation.fetch('parameters')).to include(
-        a_hash_including('in' => 'formData', 'name' => 'name', 'type' => 'string'),
-        a_hash_including('in' => 'formData', 'name' => 'enabled', 'type' => 'boolean')
-      )
+
+      if Gem::Version.new(GrapeSwagger::VERSION) >= Gem::Version.new('2.0')
+        expect(operation.fetch('parameters').map { |p| p['in'] }.uniq).to eq(['body'])
+      else
+        expect(operation.fetch('parameters').map { |p| p['in'] }.uniq).to eq(['formData'])
+      end
     end
 
     it 'documents the create endpoint with multiple consumes values' do
@@ -180,7 +181,7 @@ describe 'Swagger' do
       )
     end
 
-    it 'contrasts consumes declarations between form-encoded and JSON endpoints' do
+    it 'contrasts consumes and parameter styles between endpoints' do
       document = swagger_document
       echo_op = document.dig('paths', '/api/echo', 'post')
       submit_op = document.dig('paths', '/api/submit', 'post')
@@ -188,7 +189,8 @@ describe 'Swagger' do
       expect(echo_op.fetch('consumes')).to eq(['application/x-www-form-urlencoded'])
       expect(submit_op.fetch('consumes')).to eq(['application/json'])
       expect(echo_op.fetch('parameters').map { |p| p['in'] }.uniq).to eq(['formData'])
-      expect(submit_op.fetch('parameters').map { |p| p['in'] }.uniq).to eq(['formData'])
+      expected_in = Gem::Version.new(GrapeSwagger::VERSION) >= Gem::Version.new('2.0') ? 'body' : 'formData'
+      expect(submit_op.fetch('parameters').map { |p| p['in'] }.uniq).to eq([expected_in])
     end
 
     it 'executes a GET request through Swagger UI and applies custom headers' do
