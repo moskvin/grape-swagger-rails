@@ -76,6 +76,17 @@ GrapeSwaggerRails.options.url      = '/swagger_doc.json'
 GrapeSwaggerRails.options.app_url  = 'http://swagger.wordnik.com'
 ```
 
+To pass native Swagger UI configuration options through to `SwaggerUIBundle`, use `swagger_ui_config`:
+
+```ruby
+GrapeSwaggerRails.options.swagger_ui_config = {
+  defaultModelsExpandDepth: -1,
+  displayRequestDuration: true
+}
+```
+
+These values are merged into the `SwaggerUIBundle(...)` call before the gem's own defaults, so they apply as base configuration. The gem's own options (such as `url`, `requestInterceptor`, `presets`) still take precedence.
+
 You can dynamically set `app_url` for each request use a `before_action`:
 
 ```ruby

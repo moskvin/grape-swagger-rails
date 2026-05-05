@@ -281,6 +281,23 @@ describe 'Swagger' do
       end
     end
 
+    describe '#swagger_ui_config' do
+      before do
+        GrapeSwaggerRails.options.swagger_ui_config = {
+          'defaultModelsExpandDepth' => -1,
+          'displayRequestDuration' => true
+        }
+        visit_swagger
+      end
+
+      it 'passes native Swagger UI config through to the bundle' do
+        configs = swagger_configs
+
+        expect(configs.fetch('defaultModelsExpandDepth')).to eq(-1)
+        expect(configs.fetch('displayRequestDuration')).to eq(true)
+      end
+    end
+
     describe '#api_key_default_value' do
       before do
         GrapeSwaggerRails.options.api_auth = 'bearer'
