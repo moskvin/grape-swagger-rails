@@ -8,6 +8,8 @@ function initializeSwaggerPage() {
     }
     var options = JSON.parse(optionsElement);
     var authInput = document.getElementById("input_apiKey");
+    var specSelector = document.getElementById("spec-selector");
+    var specSelectorWrapper = document.getElementById("spec-selector-wrapper");
     var themeToggle = document.getElementById("theme-toggle");
     var root = document.documentElement;
     function getTheme() {
@@ -55,6 +57,67 @@ function initializeSwaggerPage() {
         }
         headers[key] = value;
     }
+    function absoluteSpecUrl(url) {
+        if (!url) {
+            return "";
+        }
+        if (/^https?:\/\//.test(url)) {
+            return url;
+        }
+        return options.app_url + url;
+    }
+    function normalizeSwaggerUrls() {
+        if (!Array.isArray(options.urls)) {
+            return [];
+        }
+        return options.urls
+            .map(function (entry, index) {
+            if (typeof entry === "string") {
+                return { name: entry, url: absoluteSpecUrl(entry) };
+            }
+            return {
+                name: entry.name || entry.url || "Spec " + (index + 1),
+                url: absoluteSpecUrl(entry.url),
+            };
+        })
+            .filter(function (entry) { return Boolean(entry.url); });
+    }
+    function selectedSwaggerUrl(urls) {
+        if (!urls.length) {
+            return null;
+        }
+        if (options.urls_primary_name) {
+            for (var i = 0; i < urls.length; i += 1) {
+                if (urls[i].name === options.urls_primary_name) {
+                    return urls[i];
+                }
+            }
+        }
+        if (options.url) {
+            var absoluteUrl = absoluteSpecUrl(options.url);
+            for (var j = 0; j < urls.length; j += 1) {
+                if (urls[j].url === absoluteUrl) {
+                    return urls[j];
+                }
+            }
+        }
+        return urls[0];
+    }
+    function setupSpecSelector(urls, selectedUrl) {
+        if (!specSelector || !specSelectorWrapper || urls.length < 2) {
+            return;
+        }
+        urls.forEach(function (entry) {
+            var option = document.createElement("option");
+            option.value = entry.url;
+            option.textContent = entry.name;
+            if (selectedUrl && entry.url === selectedUrl.url) {
+                option.selected = true;
+            }
+            specSelector.appendChild(option);
+        });
+        specSelectorWrapper.hidden = false;
+    }
     applyTheme(getTheme());
     if (themeToggle) {
         themeToggle.addEventListener("click", function () {
@@ -62,9 +125,9 @@ function initializeSwaggerPage() {
             applyTheme(options.theme);
         });
     }
-    var specUrl = options.app_url ? options.app_url + options.url : options.url;
-    window.ui = SwaggerUIBundle(Object.assign({}, options.swagger_ui_config || {}, {
-        url: specUrl,
+    var swaggerUrls = normalizeSwaggerUrls();
+    var selectedUrl = selectedSwaggerUrl(swaggerUrls);
+    var bundleConfig = Object.assign({}, options.swagger_ui_config || {}, {
         dom_id: "#swagger-ui-container",
         deepLinking: true,
         docExpansion: options.doc_expansion,
@@ -93,7 +156,26 @@ function initializeSwaggerPage() {
             setRequestHeader(request, options.api_key_name, apiKeyValue);
             return request;
         },
-    }));
+    });
+    if (swaggerUrls.length) {
+        bundleConfig.urls = swaggerUrls;
+        if (selectedUrl) {
+            bundleConfig["urls.primaryName"] = selectedUrl.name;
+        }
+    }
+    else {
+        bundleConfig.url = absoluteSpecUrl(options.url);
+    }
+    window.ui = SwaggerUIBundle(bundleConfig);
+    setupSpecSelector(swaggerUrls, selectedUrl);
+    if (specSelector && swaggerUrls.length > 1) {
+        specSelector.addEventListener("change", function (event) {
+            var target = event.target;
+            var url = target.value;
+            window.ui.specActions.updateUrl(url);
+            window.ui.specActions.download(url);
+        });
+    }
 }
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeSwaggerPage);
