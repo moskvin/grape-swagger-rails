@@ -17,20 +17,8 @@ interface SwaggerPageOptions {
   supported_submit_methods: string[];
   theme: string;
   url: string;
-  urls: Array<string | SwaggerUrlOption> | null;
-  urls_primary_name: string;
   validator_url: string | null | undefined;
   swagger_ui_config?: Record<string, unknown>;
-}
-
-interface SwaggerUrlOption {
-  name?: string;
-  url: string;
-}
-
-interface NormalizedSwaggerUrl {
-  name: string;
-  url: string;
 }
 
 interface SwaggerRequest {
@@ -53,8 +41,6 @@ function initializeSwaggerPage(): void {
 
   const options: SwaggerPageOptions = JSON.parse(optionsElement);
   const authInput = document.getElementById("input_apiKey") as HTMLInputElement | null;
-  const specSelector = document.getElementById("spec-selector") as HTMLSelectElement | null;
-  const specSelectorWrapper = document.getElementById("spec-selector-wrapper") as HTMLLabelElement | null;
   const themeToggle = document.getElementById("theme-toggle") as HTMLButtonElement | null;
   const root = document.documentElement;
 
@@ -119,83 +105,6 @@ function initializeSwaggerPage(): void {
     (headers as Record<string, string>)[key] = value;
   }
 
-  function absoluteSpecUrl(url: string): string {
-    if (!url) {
-      return "";
-    }
-
-    if (/^https?:\/\//.test(url)) {
-      return url;
-    }
-
-    return options.app_url + url;
-  }
-
-  function normalizeSwaggerUrls(): NormalizedSwaggerUrl[] {
-    if (!Array.isArray(options.urls)) {
-      return [];
-    }
-
-    return options.urls
-      .map((entry, index): NormalizedSwaggerUrl => {
-        if (typeof entry === "string") {
-          return { name: entry, url: absoluteSpecUrl(entry) };
-        }
-
-        return {
-          name: entry.name || entry.url || "Spec " + (index + 1),
-          url: absoluteSpecUrl(entry.url),
-        };
-      })
-      .filter((entry) => Boolean(entry.url));
-  }
-
-  function selectedSwaggerUrl(urls: NormalizedSwaggerUrl[]): NormalizedSwaggerUrl | null {
-    if (!urls.length) {
-      return null;
-    }
-
-    if (options.urls_primary_name) {
-      for (let i = 0; i < urls.length; i += 1) {
-        if (urls[i].name === options.urls_primary_name) {
-          return urls[i];
-        }
-      }
-    }
-
-    if (options.url) {
-      const absoluteUrl = absoluteSpecUrl(options.url);
-
-      for (let j = 0; j < urls.length; j += 1) {
-        if (urls[j].url === absoluteUrl) {
-          return urls[j];
-        }
-      }
-    }
-
-    return urls[0];
-  }
-
-  function setupSpecSelector(urls: NormalizedSwaggerUrl[], selectedUrl: NormalizedSwaggerUrl | null): void {
-    if (!specSelector || !specSelectorWrapper || urls.length < 2) {
-      return;
-    }
-
-    urls.forEach((entry) => {
-      const option = document.createElement("option");
-      option.value = entry.url;
-      option.textContent = entry.name;
-
-      if (selectedUrl && entry.url === selectedUrl.url) {
-        option.selected = true;
-      }
-
-      specSelector.appendChild(option);
-    });
-
-    specSelectorWrapper.hidden = false;
-  }
-
   applyTheme(getTheme());
 
   if (themeToggle) {
@@ -205,10 +114,10 @@ function initializeSwaggerPage(): void {
     });
   }
 
-  const swaggerUrls = normalizeSwaggerUrls();
-  const selectedUrl = selectedSwaggerUrl(swaggerUrls);
+  const specUrl = options.app_url ? options.app_url + options.url : options.url;
 
-  const bundleConfig = Object.assign({}, options.swagger_ui_config || {}, {
+  window.ui = SwaggerUIBundle(Object.assign({}, options.swagger_ui_config || {}, {
+    url: specUrl,
     dom_id: "#swagger-ui-container",
     deepLinking: true,
     docExpansion: options.doc_expansion,
@@ -240,30 +149,7 @@ function initializeSwaggerPage(): void {
       setRequestHeader(request, options.api_key_name, apiKeyValue);
       return request;
     },
-  });
-
-  if (swaggerUrls.length) {
-    bundleConfig.urls = swaggerUrls;
-
-    if (selectedUrl) {
-      bundleConfig["urls.primaryName"] = selectedUrl.name;
-    }
-  } else {
-    bundleConfig.url = absoluteSpecUrl(options.url);
-  }
-
-  window.ui = SwaggerUIBundle(bundleConfig);
-
-  setupSpecSelector(swaggerUrls, selectedUrl);
-
-  if (specSelector && swaggerUrls.length > 1) {
-    specSelector.addEventListener("change", (event) => {
-      const target = event.target as HTMLSelectElement;
-      const url = target.value;
-      window.ui.specActions.updateUrl(url);
-      window.ui.specActions.download(url);
-    });
-  }
+  }));
 }
 
 if (document.readyState === "loading") {

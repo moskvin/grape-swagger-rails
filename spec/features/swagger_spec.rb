@@ -281,33 +281,6 @@ describe 'Swagger' do
       end
     end
 
-    describe '#urls' do
-      before do
-        GrapeSwaggerRails.options.urls = [
-          { name: 'v1', url: '/api/swagger_doc' },
-          { name: 'v2', url: '/api/v2/swagger_doc' }
-        ]
-        GrapeSwaggerRails.options.urls_primary_name = 'v2'
-        GrapeSwaggerRails.options.url = '/api/swagger_doc'
-        visit_swagger
-      end
-
-      it 'passes multiple spec URLs to Swagger UI' do
-        configs = swagger_configs
-
-        expect(configs.fetch('urls')).to eq(
-          [
-            { 'name' => 'v1', 'url' => 'http://localhost:3000/api/swagger_doc' },
-            { 'name' => 'v2', 'url' => 'http://localhost:3000/api/v2/swagger_doc' }
-          ]
-        )
-      end
-
-      it 'shows a selector for multiple specs' do
-        expect(page).to have_select('spec-selector', selected: 'v2', options: %w[v1 v2])
-      end
-    end
-
     describe '#swagger_ui_config' do
       before do
         GrapeSwaggerRails.options.swagger_ui_config = {
