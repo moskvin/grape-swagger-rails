@@ -11,6 +11,8 @@
       %a.swagger-brand{ href: GrapeSwaggerRails.options.app_url }= GrapeSwaggerRails.options.app_name
       .swagger-controls
         %button#theme-toggle.swagger-theme-toggle{ type: 'button', aria: { pressed: 'false' } } Dark Mode
+        %label#spec-selector-wrapper.swagger-auth{ hidden: true }
+          %select#spec-selector.swagger-select{ name: 'spec-selector' }
         %label.swagger-auth
           %span.swagger-label= GrapeSwaggerRails.options.api_key_placeholder
           %input#input_apiKey.swagger-input{ name: 'apiKey', type: 'text', value: GrapeSwaggerRails.options.api_key_default_value, placeholder: GrapeSwaggerRails.options.api_key_placeholder }
