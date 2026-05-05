@@ -76,15 +76,3 @@ class API < Grape::API
 
   add_swagger_documentation
 end
-
-class APIv2 < Grape::API
-  prefix 'api'
-  version 'v2', using: :path
-
-  desc 'Get API v2 status.'
-  get '/status' do
-    { version: 'v2', status: 'ok' }
-  end
-
-  add_swagger_documentation
-end
