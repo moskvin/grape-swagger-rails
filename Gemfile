@@ -46,6 +46,7 @@ group :development, :test do
   gem 'rubocop-capybara'
   gem 'rubocop-rake'
   gem 'rubocop-rspec'
+  gem 'rubocop-rspec_rails'
   gem 'selenium-webdriver'
   gem 'sprockets', ENV.fetch('SPROCKETS_VERSION', '>= 4.0.0'), require: false
   gem 'sprockets-rails', require: false

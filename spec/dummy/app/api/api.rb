@@ -28,5 +28,51 @@ class API < Grape::API
     request.params.as_json
   end
 
+  desc 'Echo request body and headers.',
+       consumes: ['application/x-www-form-urlencoded']
+  params do
+    requires :name, type: String, desc: 'Name.'
+    optional :enabled, type: Boolean, desc: 'Enabled flag.'
+  end
+  post '/echo' do
+    request.body.rewind
+    raw_body = request.body.read
+
+    {
+      body: raw_body,
+      content_type: request.content_type,
+      headers: {
+        'X-Test-Header' => request.headers['X-Test-Header'] || request.headers['HTTP_X_TEST_HEADER']
+      },
+      params: declared(params, include_missing: false).as_json
+    }
+  end
+
+  desc 'Submit data as JSON.',
+       consumes: ['application/json']
+  params do
+    requires :name, type: String, desc: 'Name.'
+    optional :enabled, type: Boolean, desc: 'Enabled flag.'
+  end
+  post '/submit' do
+    {
+      content_type: request.content_type,
+      params: declared(params, include_missing: false).as_json
+    }
+  end
+
+  desc 'Create a resource accepting either JSON or form-encoded body.',
+       consumes: %w[application/json application/x-www-form-urlencoded]
+  params do
+    requires :name, type: String, desc: 'Name.'
+    optional :enabled, type: Boolean, desc: 'Enabled flag.'
+  end
+  post '/create' do
+    {
+      content_type: request.content_type,
+      params: declared(params, include_missing: false).as_json
+    }
+  end
+
   add_swagger_documentation
 end

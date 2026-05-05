@@ -17,7 +17,7 @@ require 'rspec/rails'
 
 Rails.backtrace_cleaner.remove_silencers!
 
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each do |f|
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each do |f|
   require f
 end
 

@@ -11,7 +11,9 @@ require 'grape-swagger-rails'
 
 module Dummy
   class Application < Rails::Application
-    config.load_defaults Rails::VERSION::STRING.to_f
+    config.load_defaults Rails.version.to_f
+
+    config.generators.system_tests = nil
 
     # For compatibility with applications that use this config
     config.action_controller.include_all_helpers = false

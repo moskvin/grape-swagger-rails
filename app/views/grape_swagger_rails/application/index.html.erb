@@ -1,136 +1,149 @@
 <!DOCTYPE html>
-<html data-swagger-options="<%= GrapeSwaggerRails.options.marshal_dump.to_json %>">
+<html data-swagger-options="<%= GrapeSwaggerRails.options.marshal_dump.to_json %>"
+      data-hide-api-key="<%= GrapeSwaggerRails.options.hide_api_key_input %>">
 <head>
   <title><%= GrapeSwaggerRails.options.app_name || 'Swagger UI' %></title>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
-  <% if defined?(Propshaft::Railtie) && Rails.application.assets.is_a?(Propshaft::Assembly) %>
-    <%= stylesheet_link_tag 'grape_swagger_rails/reset', media: 'all' %>
-    <%= stylesheet_link_tag 'grape_swagger_rails/screen-propshaft', media: 'all' %>
-
-    <%= javascript_include_tag 'grape_swagger_rails/jquery-1.8.0.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jquery.slideto.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jquery.wiggle.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jquery.ba-bbq.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/handlebars-2.0.0' %>
-    <%= javascript_include_tag 'grape_swagger_rails/marked' %>
-    <%= javascript_include_tag 'grape_swagger_rails/lodash.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/backbone-min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/swagger-ui.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/highlight.9.1.0.pack' %>
-    <%= javascript_include_tag 'grape_swagger_rails/js-yaml.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/jsoneditor.min' %>
-    <%= javascript_include_tag 'grape_swagger_rails/object-assign-pollyfill' %>
-    <%= javascript_include_tag 'grape_swagger_rails/swagger-oauth' %>
-    <%= javascript_include_tag 'grape_swagger_rails/base64' %>
-  <% else %>
-    <%= stylesheet_link_tag 'grape_swagger_rails/application', media: 'all' %>
-    <%= javascript_include_tag 'grape_swagger_rails/application' %>
-  <% end %>
-  <script type="text/javascript">
-	$(function () {
-	  var options = $("html").data('swagger-options');
-
-    var headers = {};
-    <% GrapeSwaggerRails.options.headers.each_with_index do |(key, value), index| %>
-      <%=raw "headers.header_#{index} = new SwaggerClient.ApiKeyAuthorization('#{CGI.escapeHTML(key)}', '#{CGI.escapeHTML(value)}', 'header');" %>
-    <% end %>
-
-    <% if GrapeSwaggerRails.options.api_key_default_value.try(:strip).present? &&
-          GrapeSwaggerRails.options.headers['Authorization'].blank? %>
-      <% headers_count = GrapeSwaggerRails.options.headers.count %>
-      <%= raw "headers.header_#{headers_count} = getApiKeyAuthorization();" %>
-    <% end %>
-
-    window.swaggerUi = new SwaggerUi({
-      url: options.app_url + options.url,
-      dom_id: "swagger-ui-container",
-      supportHeaderParams: true,
-      supportedSubmitMethods: options.supported_submit_methods || [],
-      authorizations: headers,
-      onComplete: function(swaggerApi, swaggerUi){
-        if('console' in window) {
-          console.log("Loaded SwaggerUI")
-          console.log(swaggerApi);
-          console.log(swaggerUi);
-        }
-        $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
-      },
-      onFailure: function(data) {
-        if('console' in window) {
-          console.log("Unable to Load SwaggerUI");
-          console.log(data);
-        }
-      },
-      docExpansion: options.doc_expansion,
-      validatorUrl: options.validator_url,
-      apisSorter: "alpha"
-    });
-
-    function getApiKeyAuthorization() {
-      var key = $('#input_apiKey')[0].value;
-
-      if (key && key.trim() != "") {
-        if (options.api_auth == 'basic') {
-          key = "Basic " + Base64.encode(key);
-        } else if (options.api_auth == 'bearer') {
-          key = "Bearer " + key;
-        } else if (options.api_auth == 'token') {
-          key = 'Token token="' + key + '"';
-        }
-        return new SwaggerClient.ApiKeyAuthorization(options.api_key_name, key, options.api_key_type);
-      }
-    }
-
-    function addApiKeyAuthorization() {
-      var apiKeyAuthorization = getApiKeyAuthorization();
-      if (apiKeyAuthorization) {
-        window.swaggerUi.api.clientAuthorizations.add("key", apiKeyAuthorization);
-      }
-    }
-
-    $('#input_apiKey').change(addApiKeyAuthorization);
-
-    window.swaggerUi.load();
-
-  });
-  </script>
-  <style>
-    input#input_baseUrl, a#explore.exploreBtn {
-      <% if GrapeSwaggerRails.options.hide_url_input %>
-      display: none;
-      <% end %>
-    }
-
-    input#input_apiKey {
-      <% if GrapeSwaggerRails.options.hide_api_key_input %>
-      display: none;
-      <% end %>
-    }
-  </style>
+  <%= stylesheet_link_tag 'grape_swagger_rails/swagger-ui', media: 'all' %>
+  <%= stylesheet_link_tag 'grape_swagger_rails/index', media: 'all' %>
 </head>
 
-<body class="swagger-section">
-<div id='header'>
-  <div class="swagger-ui-wrap">
-    <a id="logo" href="<%= GrapeSwaggerRails.options.app_url %>"><%= GrapeSwaggerRails.options.app_name %></a>
+<body>
+  <header class="swagger-header">
+    <a class="swagger-brand" href="<%= GrapeSwaggerRails.options.app_url %>"><%= GrapeSwaggerRails.options.app_name %></a>
+    <div class="swagger-controls">
+      <button id="theme-toggle" class="swagger-theme-toggle" type="button" aria-pressed="false">Dark Mode</button>
+      <label class="swagger-auth">
+        <span class="swagger-label"><%= GrapeSwaggerRails.options.api_key_placeholder %></span>
+        <input
+          id="input_apiKey"
+          class="swagger-input"
+          name="apiKey"
+          type="text"
+          value="<%= GrapeSwaggerRails.options.api_key_default_value %>"
+          placeholder="<%= GrapeSwaggerRails.options.api_key_placeholder %>">
+      </label>
+    </div>
+  </header>
 
-    <form id='api_selector'>
-      <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>
-      <div class='input'><input placeholder="<%= GrapeSwaggerRails.options.api_key_placeholder %>" id="input_apiKey" name="apiKey" type="text" value="<%= GrapeSwaggerRails.options.api_key_default_value %>"/></div>
-      <div class='input'><a id="explore" class="exploreBtn" href="#">Explore</a></div>
-    </form>
-  </div>
-</div>
+  <div id="swagger-ui-container"></div>
 
-<div id="message-bar" class="swagger-ui-wrap">
-  &nbsp;
-</div>
+  <%= javascript_include_tag 'grape_swagger_rails/swagger-ui-bundle' %>
+  <%= javascript_include_tag 'grape_swagger_rails/swagger-ui-standalone-preset' %>
+  <script>
+    (function() {
+      var options = JSON.parse(document.documentElement.dataset.swaggerOptions);
+      var authInput = document.getElementById('input_apiKey');
+      var themeToggle = document.getElementById('theme-toggle');
+      var root = document.documentElement;
 
-<div id="swagger-ui-container" class="swagger-ui-wrap">
+      function getTheme() {
+        return options.theme === 'dark' ? 'dark' : 'light';
+      }
 
-</div>
+      function applyTheme(theme) {
+        root.dataset.theme = theme;
+        root.classList.toggle('dark-mode', theme === 'dark');
 
+        if (!themeToggle) {
+          return;
+        }
+
+        themeToggle.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+      }
+
+      function getApiKeyValue() {
+        if (!authInput) {
+          return '';
+        }
+
+        var key = authInput.value ? authInput.value.trim() : '';
+
+        if (!key) {
+          return '';
+        }
+
+        if (options.api_auth === 'basic') {
+          return 'Basic ' + btoa(key);
+        }
+
+        if (options.api_auth === 'bearer') {
+          return 'Bearer ' + key;
+        }
+
+        if (options.api_auth === 'token') {
+          return 'Token token="' + key + '"';
+        }
+
+        return key;
+      }
+
+      function ensureRequestHeaders(request) {
+        if (!request.headers) {
+          request.headers = {};
+        }
+
+        return request.headers;
+      }
+
+      function setRequestHeader(request, key, value) {
+        var headers = ensureRequestHeaders(request);
+
+        if (headers instanceof Headers) {
+          headers.set(key, value);
+          return;
+        }
+
+        headers[key] = value;
+      }
+
+      applyTheme(getTheme());
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+          options.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+          applyTheme(options.theme);
+        });
+      }
+
+      var specUrl = options.app_url ? options.app_url + options.url : options.url;
+
+      window.ui = SwaggerUIBundle({
+        url: specUrl,
+        dom_id: '#swagger-ui-container',
+        deepLinking: true,
+        docExpansion: options.doc_expansion,
+        supportedSubmitMethods: options.supported_submit_methods || [],
+        validatorUrl: options.validator_url,
+        layout: 'BaseLayout',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        requestInterceptor: function(request) {
+          var headers = options.headers || {};
+          Object.keys(headers).forEach(function(key) {
+            setRequestHeader(request, key, headers[key]);
+          });
+
+          var apiKeyValue = getApiKeyValue();
+          if (!apiKeyValue) {
+            return request;
+          }
+
+          if (options.api_key_type === 'query') {
+            var separator = request.url.indexOf('?') === -1 ? '?' : '&';
+            request.url += separator + encodeURIComponent(options.api_key_name) + '=' + encodeURIComponent(apiKeyValue);
+            return request;
+          }
+
+          setRequestHeader(request, options.api_key_name, apiKeyValue);
+          return request;
+        }
+      });
+    })();
+  </script>
 </body>
-
 </html>
