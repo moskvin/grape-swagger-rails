@@ -63,7 +63,7 @@ function initializeSwaggerPage() {
         });
     }
     var specUrl = options.app_url ? options.app_url + options.url : options.url;
-    window.ui = SwaggerUIBundle({
+    window.ui = SwaggerUIBundle(Object.assign({}, options.swagger_ui_config || {}, {
         url: specUrl,
         dom_id: "#swagger-ui-container",
         deepLinking: true,
@@ -93,7 +93,7 @@ function initializeSwaggerPage() {
             setRequestHeader(request, options.api_key_name, apiKeyValue);
             return request;
         },
-    });
+    }));
 }
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeSwaggerPage);

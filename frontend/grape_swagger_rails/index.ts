@@ -18,6 +18,7 @@ interface SwaggerPageOptions {
   theme: string;
   url: string;
   validator_url: string | null | undefined;
+  swagger_ui_config?: Record<string, unknown>;
 }
 
 interface SwaggerRequest {
@@ -115,7 +116,7 @@ function initializeSwaggerPage(): void {
 
   const specUrl = options.app_url ? options.app_url + options.url : options.url;
 
-  window.ui = SwaggerUIBundle({
+  window.ui = SwaggerUIBundle(Object.assign({}, options.swagger_ui_config || {}, {
     url: specUrl,
     dom_id: "#swagger-ui-container",
     deepLinking: true,
@@ -148,7 +149,7 @@ function initializeSwaggerPage(): void {
       setRequestHeader(request, options.api_key_name, apiKeyValue);
       return request;
     },
-  });
+  }));
 }
 
 if (document.readyState === "loading") {

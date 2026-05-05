@@ -27,6 +27,7 @@ module GrapeSwaggerRails
 
   self.options = Options.new(
     url: '/swagger_doc',
+    swagger_ui_config: {},
     app_name: 'Swagger',
     app_url: '',
 
