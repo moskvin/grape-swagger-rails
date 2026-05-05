@@ -4,6 +4,5 @@ Rails.application.routes.draw do
   get 'up' => 'rails/health#show', as: :rails_health_check
   root 'welcome#index'
   mount API => '/'
-  mount APIv2 => '/'
   mount GrapeSwaggerRails::Engine => '/swagger'
 end

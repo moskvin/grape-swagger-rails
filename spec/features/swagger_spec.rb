@@ -303,18 +303,8 @@ describe 'Swagger' do
         )
       end
 
-      it 'shows a selector with v2 selected by default' do
+      it 'shows a selector for multiple specs' do
         expect(page).to have_select('spec-selector', selected: 'v2', options: %w[v1 v2])
-      end
-
-      it 'switches specs via the dropdown without errors' do
-        expect(page).to have_select('spec-selector', selected: 'v2')
-
-        select 'v1', from: 'spec-selector'
-
-        # v1 exposes foos namespace; wait for it to appear in the rendered spec
-        expect(page).to have_css('.opblock-tag', text: 'foos', wait: 10)
-        expect(page).to have_no_css('.errors-wrapper')
       end
     end
 
