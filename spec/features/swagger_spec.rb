@@ -146,7 +146,7 @@ describe 'Swagger' do
 
       expect(document['swagger']).to eq('2.0')
       expect(document).not_to have_key('openapi')
-      expect(document.fetch('paths')).to include('/api/headers', '/api/echo')
+      expect(document.fetch('paths')).to include('/api/headers', '/api/echo', '/api/submit', '/api/create')
     end
 
     it 'documents the echo endpoint as form data with form encoding' do
@@ -160,6 +160,37 @@ describe 'Swagger' do
       )
     end
 
+    it 'documents the submit endpoint with JSON consumes and formData parameters' do
+      operation = swagger_document.dig('paths', '/api/submit', 'post')
+
+      expect(operation.fetch('consumes')).to eq(['application/json'])
+      expect(operation.fetch('parameters')).to include(
+        a_hash_including('in' => 'formData', 'name' => 'name', 'type' => 'string'),
+        a_hash_including('in' => 'formData', 'name' => 'enabled', 'type' => 'boolean')
+      )
+    end
+
+    it 'documents the create endpoint with multiple consumes values' do
+      operation = swagger_document.dig('paths', '/api/create', 'post')
+
+      expect(operation.fetch('consumes')).to eq(%w[application/json application/x-www-form-urlencoded])
+      expect(operation.fetch('parameters')).to include(
+        a_hash_including('in' => 'formData', 'name' => 'name'),
+        a_hash_including('in' => 'formData', 'name' => 'enabled')
+      )
+    end
+
+    it 'contrasts consumes declarations between form-encoded and JSON endpoints' do
+      document = swagger_document
+      echo_op = document.dig('paths', '/api/echo', 'post')
+      submit_op = document.dig('paths', '/api/submit', 'post')
+
+      expect(echo_op.fetch('consumes')).to eq(['application/x-www-form-urlencoded'])
+      expect(submit_op.fetch('consumes')).to eq(['application/json'])
+      expect(echo_op.fetch('parameters').map { |p| p['in'] }.uniq).to eq(['formData'])
+      expect(submit_op.fetch('parameters').map { |p| p['in'] }.uniq).to eq(['formData'])
+    end
+
     it 'executes a GET request through Swagger UI and applies custom headers' do
       GrapeSwaggerRails.options.headers['X-Test-Header'] = 'Smoke'
 
@@ -167,7 +198,7 @@ describe 'Swagger' do
       open_operation('operations-tag-headers', 'operations-headers-getApiHeaders')
       execute_operation('operations-headers-getApiHeaders')
 
-      expect(page).to have_text('"X-Test-Header": "Smoke"')
+      expect(page).to have_text(/"x-test-header": "Smoke"/i)
       expect(page).to have_text("curl -X 'GET'")
     end
 
