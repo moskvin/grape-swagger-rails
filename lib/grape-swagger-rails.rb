@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'haml/railtie'
 require 'grape-swagger-rails/engine'
 require 'ostruct'
 
