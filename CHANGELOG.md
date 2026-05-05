@@ -3,6 +3,7 @@
 * [#138](https://github.com/ruby-grape/grape-swagger-rails/pull/138): Migrate Danger to use danger-pr-comment workflow - [@dblock](https://github.com/dblock).
 * [#140](https://github.com/ruby-grape/grape-swagger-rails/pull/140): Update CI matrix and compatibility documentation - [@moskvin](https://github.com/moskvin).
 * [#141](https://github.com/ruby-grape/grape-swagger-rails/pull/141): Replace swagger ui 2.x with swaggeruibundle v5 standalone integration - [@moskvin](https://github.com/moskvin).
+* [#142](https://github.com/ruby-grape/grape-swagger-rails/pull/142): Convert view to haml and extract javascript to typescript - [@moskvin](https://github.com/moskvin).
 * Your contribution here.
 
 ### 0.7.0 (2025/09/16)

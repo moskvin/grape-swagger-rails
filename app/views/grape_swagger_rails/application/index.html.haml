@@ -1,0 +1,20 @@
+!!! 5
+%html{ data: { swagger_options: GrapeSwaggerRails.options.marshal_dump.to_json, hide_api_key: GrapeSwaggerRails.options.hide_api_key_input } }
+  %head
+    %title= GrapeSwaggerRails.options.app_name || 'Swagger UI'
+    %meta{ charset: 'utf-8' }
+    %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    = stylesheet_link_tag 'grape_swagger_rails/swagger-ui', media: 'all'
+    = stylesheet_link_tag 'grape_swagger_rails/index', media: 'all'
+  %body
+    %header.swagger-header
+      %a.swagger-brand{ href: GrapeSwaggerRails.options.app_url }= GrapeSwaggerRails.options.app_name
+      .swagger-controls
+        %button#theme-toggle.swagger-theme-toggle{ type: 'button', aria: { pressed: 'false' } } Dark Mode
+        %label.swagger-auth
+          %span.swagger-label= GrapeSwaggerRails.options.api_key_placeholder
+          %input#input_apiKey.swagger-input{ name: 'apiKey', type: 'text', value: GrapeSwaggerRails.options.api_key_default_value, placeholder: GrapeSwaggerRails.options.api_key_placeholder }
+    #swagger-ui-container
+    = javascript_include_tag 'grape_swagger_rails/swagger-ui-bundle'
+    = javascript_include_tag 'grape_swagger_rails/swagger-ui-standalone-preset'
+    = javascript_include_tag 'grape_swagger_rails/index'
