@@ -1,3 +1,7 @@
+interface Window {
+  ui: any;
+}
+
 interface SwaggerPageOptions {
   api_auth: string;
   api_key_name: string;
