@@ -294,7 +294,7 @@ describe 'Swagger' do
         configs = swagger_configs
 
         expect(configs.fetch('defaultModelsExpandDepth')).to eq(-1)
-        expect(configs.fetch('displayRequestDuration')).to eq(true)
+        expect(configs.fetch('displayRequestDuration')).to be(true)
       end
     end
 
