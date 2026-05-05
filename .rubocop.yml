@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.4
   NewCops: enable
 
 inherit_from: .rubocop_todo.yml
@@ -8,3 +8,8 @@ plugins:
   - rubocop-capybara
   - rubocop-rake
   - rubocop-rspec
+  - rubocop-rspec_rails
+
+Metrics/MethodLength:
+  CountAsOne:
+    - heredoc

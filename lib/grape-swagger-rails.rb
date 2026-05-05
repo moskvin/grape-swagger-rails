@@ -5,12 +5,12 @@ require 'ostruct'
 
 module GrapeSwaggerRails
   class Options < OpenStruct
-    def before_filter(&block)
+    def before_filter(&)
       GrapeSwaggerRails.deprecator.warn(
         'This option is deprecated and going to be removed in 1.0.0. ' \
         'Please use `before_action` instead'
       )
-      before_action(&block)
+      before_action(&)
     end
 
     def before_action(&block)

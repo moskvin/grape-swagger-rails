@@ -90,7 +90,7 @@ describe 'Swagger' do
     JS
   end
 
-  def set_api_key(value)
+  def fill_api_key(value)
     find_by_id('input_apiKey').set(value)
   end
 
@@ -102,6 +102,15 @@ describe 'Swagger' do
   def execute_operation(operation_id)
     within("##{operation_id}") do
       find('.try-out__btn').click
+      find('.execute').click
+    end
+  end
+
+  def fill_echo_form
+    within('#operations-echo-postApiEcho') do
+      find('.try-out__btn').click
+      find('tr[data-param-name="name"] input').set('Widget')
+      find('tr[data-param-name="enabled"] select').find('option', text: 'true').select_option
       find('.execute').click
     end
   end
@@ -162,24 +171,24 @@ describe 'Swagger' do
       expect(page).to have_text("curl -X 'GET'")
     end
 
-    it 'executes a POST request through Swagger UI and submits form data' do
-      GrapeSwaggerRails.options.headers['X-Test-Header'] = 'Smoke'
-
-      visit_swagger
-      open_operation('operations-tag-echo', 'operations-echo-postApiEcho')
-
-      within('#operations-echo-postApiEcho') do
-        find('.try-out__btn').click
-        find('tr[data-param-name="name"] input').set('Widget')
-        find('tr[data-param-name="enabled"] select').find('option', text: 'true').select_option
-        find('.execute').click
+    context 'POST request via Swagger UI' do
+      before do
+        GrapeSwaggerRails.options.headers['X-Test-Header'] = 'Smoke'
+        visit_swagger
+        open_operation('operations-tag-echo', 'operations-echo-postApiEcho')
+        fill_echo_form
       end
 
-      expect(page).to have_text('"body": "name=Widget&enabled=true"')
-      expect(page).to have_text('"content_type": "application/x-www-form-urlencoded"')
-      expect(page).to have_text('"name": "Widget"')
-      expect(page).to have_text('"enabled": true')
-      expect(page).to have_text('"X-Test-Header": "Smoke"')
+      it 'submits form-encoded body' do
+        expect(page).to have_text('"body": "name=Widget&enabled=true"')
+        expect(page).to have_text('"content_type": "application/x-www-form-urlencoded"')
+        expect(page).to have_text('"name": "Widget"')
+        expect(page).to have_text('"enabled": true')
+      end
+
+      it 'forwards custom headers' do
+        expect(page).to have_text('"X-Test-Header": "Smoke"')
+      end
     end
   end
 
@@ -275,7 +284,7 @@ describe 'Swagger' do
       end
 
       it 'adds an Authorization header' do
-        set_api_key('username:password')
+        fill_api_key('username:password')
 
         request = intercepted_request('http://localhost:3000/api/headers')
 
@@ -294,7 +303,7 @@ describe 'Swagger' do
       end
 
       it 'adds an Authorization header' do
-        set_api_key('token')
+        fill_api_key('token')
 
         request = intercepted_request('http://localhost:3000/api/headers')
 
@@ -311,7 +320,7 @@ describe 'Swagger' do
       end
 
       it 'adds an Authorization header' do
-        set_api_key('token')
+        fill_api_key('token')
 
         request = intercepted_request('http://localhost:3000/api/headers')
 
@@ -319,7 +328,7 @@ describe 'Swagger' do
       end
 
       it 'adds an Authorization header when the request uses a Headers object' do
-        set_api_key('token')
+        fill_api_key('token')
 
         request = intercepted_request_with_headers_object('http://localhost:3000/api/headers')
 
@@ -335,7 +344,7 @@ describe 'Swagger' do
       end
 
       it 'adds an api_token query parameter' do
-        set_api_key('dummy')
+        fill_api_key('dummy')
 
         request = intercepted_request('http://localhost:3000/api/params')
 
