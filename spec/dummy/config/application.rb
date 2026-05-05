@@ -11,7 +11,7 @@ require 'grape-swagger-rails'
 
 module Dummy
   class Application < Rails::Application
-    config.load_defaults 8.1
+    config.load_defaults Rails.version.to_f
 
     config.generators.system_tests = nil
 
